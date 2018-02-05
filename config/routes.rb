@@ -7,9 +7,15 @@ Rails.application.routes.draw do
     resources :feedbacks
   end
 
+  namespace :admin_api, defaults: {format: 'json'} do
+    resources :feedback, only: [:index]
+  end
+
   get '/robots.txt', to: 'static#robots'
 
   get 'markdown/show'
+
+  match '/markdown', to: 'markdown#preview', via: [:get, :post]
 
   get '/signout', to: 'sessions#destroy'
 
@@ -43,7 +49,7 @@ Rails.application.routes.draw do
 
   get '/api', to: 'api#index'
 
-  get '/api/*specification(/:code_language)', to: 'open_api#show', as: 'open_api', constraints: { specification: /sms/ }
+  get '/api/*definition(/:code_language)', to: 'open_api#show', as: 'open_api', constraints: { definition: /sms/ }
   get '/api/*document(/:code_language)', to: 'api#show', constraints: DocumentationConstraint.code_language
 
   get '/*product/(api|ncco)-reference', to: 'markdown#api'
