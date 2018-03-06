@@ -1,0 +1,207 @@
+---
+openapi: "3.0.0"
+info:
+  version: "v1"
+  title: "RedactApplication"
+servers:
+  - url: https://api.nexmo.com
+security:
+  - basicAuth: []
+paths:
+  /v1/redact/identity:
+    post:
+      summary: Redact all records for an identity
+      description: ""
+      x-group: identity
+      requestBody:
+        description: An identity redaction
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedactIdentity'
+      responses:
+        '204':
+          description: "Success"
+        '400':
+          description: "Incorrect product specified"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '401':
+          description: "Authentication failure"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '403':
+          description: "Authorisation denied"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '404':
+          description: "No such record"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '500':
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternal'
+        '503':
+          description: "Service unavailable"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternal'
+  /v1/redact/transaction:
+    post:
+      summary: Redact a specific message
+      description: ""
+      x-group: transaction
+      requestBody:
+        description: An identity redaction
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedactTransaction'
+      responses:
+        '204':
+          description: "Success"
+        '400':
+          description: "Incorrect product specified"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '401':
+          description: "Authentication failure"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '403':
+          description: "Authorisation denied"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '404':
+          description: "No such record"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUser'
+        '500':
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternal'
+        '503':
+          description: "Service unavailable"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternal'
+x-groups:
+  transaction:
+    name: Transaction
+    order: 1
+    description: This is the description of what the API is used for
+  identity:
+    name: Identity
+    order: 2
+    description: This is the description of what the API is used for
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+   ErrorUser:
+     type: object
+     properties:
+      type:
+       type: string
+       required: true
+       description: Link to error / remediation options
+       example: https://developer.nexmo.com/error/redact/validation#missing-parameters
+      title:
+       type: string
+       required: true
+       description: Generic error message
+       example: You do not have enough credit.
+      detail:
+       type: string
+       required: false
+       description: Additional information about the error
+       example: Your current balance is 30, but that costs 50.
+      instance:
+       type: string
+       required: true
+       description: Internal Trace ID
+       example: ABC123
+   ErrorInternal:
+     type: object
+     properties:
+      type:
+       type: string
+       required: true
+       description: Link to error / remediation options
+       example: https://developer.nexmo.com/error/internal#internal-error
+      title:
+       type: string
+       required: true
+       description: Generic error message
+       example: Internal server error
+      instance:
+       type: string
+       required: true
+       description: Internal Trace ID
+       example: ABC123
+   RedactIdentity:
+     type: object
+     properties:
+      id:
+       type: string
+       required: true
+       description: >
+         The identity to redact. This could be a phone number or an external
+         provider ID
+       example: 14155550100
+   RedactTransaction:
+     type: object
+     properties:
+       id:
+         required: true
+         type: string
+         description: The transaction ID to redact
+       product:
+         required: true
+         type: string
+         example: sms
+         description: Product name that the ID provided relates to
+         enum:
+         - sms
+         - voice
+         - number-insight
+         - verify
+         - verify-sdk
+         - message
+         - workflow
+       type:
+         required: false
+         type: string
+         enum:
+         - inbound
+         - outbound
+         example: outbound
+         default: outbound
+         description: Required if redacting SMS data
